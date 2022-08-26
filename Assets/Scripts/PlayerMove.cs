@@ -20,6 +20,11 @@ public class PlayerMove : MonoBehaviour
       {
          Attack();
       }
+
+      if (Input.GetKeyDown(KeyCode.Space))
+      {
+         Jump();
+      }
    }
 
    private void FixedUpdate()
@@ -36,6 +41,7 @@ public class PlayerMove : MonoBehaviour
    private void Move()
    {
       _rigidbody.MovePosition(transform.position + _direction * _speed * Time.fixedDeltaTime);
+      //_rigidbody.velocity = new Vector2(_direction.x * _speed, _rigidbody.velocity.y);
       transform.localScale = new Vector3(_direction.x, transform.localScale.y, transform.localScale.z);
       _animator.SetBool("isMove", true);
    }
@@ -43,6 +49,11 @@ public class PlayerMove : MonoBehaviour
    private void Attack()
    {
       _animator.SetTrigger("attack");
+   }
+
+   private void Jump()
+   {
+      //_rigidbody.velocity.y =
    }
 
 
