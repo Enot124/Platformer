@@ -4,9 +4,15 @@ public class PlayerMove : MonoBehaviour
 {
    [SerializeField] private Transform _groundCheck;
    [SerializeField] private LayerMask _groundLayer;
+
    private float _speed = 5f;
-   private float _jumpForce = 7f;
+
+   private float _jumpForce = 200f;
+   private float _jumpIteration = 1f;
+   private float _jumpValue = 200f;
+
    private bool _isGrounded;
+
    private Vector3 _direction;
    private Animator _animator;
    private Rigidbody2D _rigidbody;
@@ -20,12 +26,20 @@ public class PlayerMove : MonoBehaviour
    private void Update()
    {
       _isGrounded = CheckGround();
-      if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
-         Jump();
-
       _animator.SetBool("isJump", !_isGrounded);
 
+      if (Input.GetKey(KeyCode.Space) && (_isGrounded || (_jumpIteration > 1f)))
+         Jump();
+      if (Input.GetKeyUp(KeyCode.Space))
+         _jumpIteration = 1f;
 
+      if (Input.GetMouseButtonDown(0))
+         Attack();
+
+   }
+
+   private void FixedUpdate()
+   {
       _direction.x = (int)Input.GetAxisRaw("Horizontal");
       if (_direction.x != 0)
       {
@@ -33,16 +47,6 @@ public class PlayerMove : MonoBehaviour
       }
       else
          _animator.SetBool("isMove", false);
-
-      if (Input.GetMouseButtonDown(0))
-      {
-         Attack();
-      }
-   }
-
-   private void FixedUpdate()
-   {
-
    }
 
    private void Move()
@@ -59,13 +63,14 @@ public class PlayerMove : MonoBehaviour
 
    private void Jump()
    {
-      _rigidbody.AddForce(transform.up * _jumpForce, ForceMode2D.Impulse);
+      if (++_jumpIteration < _jumpValue)
+         _rigidbody.AddForce(transform.up * _jumpForce / _jumpIteration);
+
    }
 
    private bool CheckGround()
    {
       Collider2D[] collider = Physics2D.OverlapCircleAll(_groundCheck.position, 0.3f, _groundLayer);
-      Debug.Log(collider.Length);
       return collider.Length > 0;
    }
 
