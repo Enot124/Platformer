@@ -9,7 +9,8 @@ public class PlayerMove : MonoBehaviour
 
    private float _jumpForce = 200f;
    private float _jumpIteration = 1f;
-   private float _jumpValue = 200f;
+   private int _jumpCount = 0;
+   private int _jumpMaxCount = 2;
 
    private bool _isGrounded;
 
@@ -21,6 +22,7 @@ public class PlayerMove : MonoBehaviour
    {
       _animator = GetComponent<Animator>();
       _rigidbody = GetComponent<Rigidbody2D>();
+      Application.targetFrameRate = 70;
    }
 
    private void Update()
@@ -28,10 +30,15 @@ public class PlayerMove : MonoBehaviour
       _isGrounded = CheckGround();
       _animator.SetBool("isJump", !_isGrounded);
 
-      if (Input.GetKey(KeyCode.Space) && (_isGrounded || (_jumpIteration > 1f)))
+      if (Input.GetKey(KeyCode.Space) && (_isGrounded || (_jumpIteration > 1f) || (_jumpCount < _jumpMaxCount)))
          Jump();
       if (Input.GetKeyUp(KeyCode.Space))
+      {
          _jumpIteration = 1f;
+         _jumpCount++;
+      }
+      if (_isGrounded && _jumpCount > 0)
+         _jumpCount = 0;
 
       if (Input.GetMouseButtonDown(0))
          Attack();
@@ -63,7 +70,7 @@ public class PlayerMove : MonoBehaviour
 
    private void Jump()
    {
-      if (++_jumpIteration < _jumpValue)
+      if (++_jumpIteration < _jumpForce)
          _rigidbody.AddForce(transform.up * _jumpForce / _jumpIteration);
 
    }
