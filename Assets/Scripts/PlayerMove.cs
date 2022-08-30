@@ -7,10 +7,11 @@ public class PlayerMove : MonoBehaviour
 
    private float _speed = 5f;
 
-   private float _jumpForce = 200f;
+   private float _jumpForce = 2f;
    private float _jumpIteration = 1f;
    private int _jumpCount = 0;
    private int _jumpMaxCount = 2;
+   private bool _jumpPressed;
 
    private bool _isGrounded;
 
@@ -30,8 +31,12 @@ public class PlayerMove : MonoBehaviour
       _isGrounded = CheckGround();
       _animator.SetBool("isJump", !_isGrounded);
 
+      _direction.x = (int)Input.GetAxisRaw("Horizontal");
+
       if (Input.GetKey(KeyCode.Space) && (_isGrounded || (_jumpIteration > 1f) || (_jumpCount < _jumpMaxCount)))
-         Jump();
+         _jumpPressed = true;
+      else
+         _jumpPressed = false;
       if (Input.GetKeyUp(KeyCode.Space))
       {
          _jumpIteration = 1f;
@@ -47,20 +52,21 @@ public class PlayerMove : MonoBehaviour
 
    private void FixedUpdate()
    {
-      _direction.x = (int)Input.GetAxisRaw("Horizontal");
-      if (_direction.x != 0)
-      {
-         Move();
-      }
-      else
-         _animator.SetBool("isMove", false);
+      Move();
+      Jump();
    }
 
    private void Move()
    {
-      _animator.SetBool("isMove", _isGrounded);
-      _rigidbody.velocity = new Vector2(_direction.x * _speed, _rigidbody.velocity.y);
-      transform.localScale = new Vector3(_direction.x, transform.localScale.y, transform.localScale.z);
+
+      if (_direction.x != 0)
+      {
+         _animator.SetBool("isMove", _isGrounded);
+         _rigidbody.velocity = new Vector2(_direction.x * _speed, _rigidbody.velocity.y);
+         transform.localScale = new Vector3(_direction.x, transform.localScale.y, transform.localScale.z);
+      }
+      else
+         _animator.SetBool("isMove", false);
    }
 
    private void Attack()
@@ -70,8 +76,10 @@ public class PlayerMove : MonoBehaviour
 
    private void Jump()
    {
-      if (++_jumpIteration < _jumpForce)
-         _rigidbody.AddForce(transform.up * _jumpForce / _jumpIteration);
+      if (_jumpPressed)
+         if (++_jumpIteration < 10)
+            //_rigidbody.AddForce(transform.up * _jumpForce / _jumpIteration);
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce + _jumpIteration);
 
    }
 
